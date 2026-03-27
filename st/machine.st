@@ -1,9 +1,9 @@
 PROGRAM MACHINE
 VAR
-  start_button   AT %IX0.0 : BOOL;
-  stop_button    AT %IX0.1 : BOOL;
-  enable_output  AT %QX0.0 : BOOL;
-  target_word    AT %QW2   : INT;
+  start_button   AT %IX0.0 : BOOL;  // @ecmc ec0.s2.mm.inputDataArray01
+  stop_button    AT %IX0.1 : BOOL;  // @ecmc ec0.s2.mm.inputDataArray01
+  enable_output  AT %QX0.0 : BOOL;  // @ecmc ec0.s2.mm.outputDataArray01
+  target_word    AT %QW2   : INT;   // @ecmc ec0.s2.mm.outputDataArray01
   counter        AT %MW0   : INT;
 END_VAR
 
