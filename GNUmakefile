@@ -10,6 +10,7 @@ ECMC_MOTION_STLIB := $(ECMC_MOTION_LIB_DIR)/ecmc-motion.stlib
 LOGIC_MODULES := machine_logic el7041_velocity_logic motion_actpos_mirror_logic mc_power_move_abs_logic mc_power_move_absolute_lib_logic mc_power_move_velocity_lib_logic mc_power_move_relative_lib_logic
 PYTHON ?= python3
 MAPGEN := $(ECMC_PLUGIN_STRUCPP)/scripts/strucpp_mapgen.py
+EXPORTGEN := $(ECMC_PLUGIN_STRUCPP)/scripts/strucpp_epics_exportgen.py
 
 CXX ?= c++
 CXXFLAGS += -std=c++17 -fPIC -Wall -Wextra
@@ -72,6 +73,7 @@ MC_POWER_MOVE_ABSOLUTE_LIB_TARGET := $(BUILD_DIR)/mc_power_move_absolute_lib_log
 MC_POWER_MOVE_VELOCITY_LIB_TARGET := $(BUILD_DIR)/mc_power_move_velocity_lib_logic.$(LIBEXT)
 MC_POWER_MOVE_RELATIVE_LIB_TARGET := $(BUILD_DIR)/mc_power_move_relative_lib_logic.$(LIBEXT)
 MACHINE_MAP := $(BUILD_DIR)/machine.map
+MACHINE_EXPORTS := src/generated/machine_epics_exports.hpp
 EL7041_VELOCITY_MAP := $(BUILD_DIR)/el7041_velocity.map
 MOTION_ACTPOS_MIRROR_MAP := $(BUILD_DIR)/motion_actpos_mirror.map
 TARGETS := $(MACHINE_TARGET) $(EL7041_VELOCITY_TARGET) $(MOTION_ACTPOS_MIRROR_TARGET) $(MC_POWER_MOVE_ABS_TARGET) $(MC_POWER_MOVE_ABSOLUTE_LIB_TARGET) $(MC_POWER_MOVE_VELOCITY_LIB_TARGET) $(MC_POWER_MOVE_RELATIVE_LIB_TARGET) $(MACHINE_MAP) $(EL7041_VELOCITY_MAP) $(MOTION_ACTPOS_MIRROR_MAP)
@@ -112,6 +114,11 @@ $(BUILD_DIR)/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/machine_logic.o: $(MACHINE_EXPORTS)
+
+$(MACHINE_EXPORTS): src/generated/machine.hpp st/machine.st $(EXPORTGEN)
+	$(PYTHON) $(EXPORTGEN) --st-source st/machine.st --header src/generated/machine.hpp --header-include generated/machine.hpp --output $@
+
 $(MACHINE_MAP): src/generated/machine.hpp st/machine.st $(MAPGEN)
 	@mkdir -p $(dir $@)
 	$(PYTHON) $(MAPGEN) --header src/generated/machine.hpp --st-source st/machine.st --output $@
@@ -147,3 +154,4 @@ maps: $(MACHINE_MAP) $(EL7041_VELOCITY_MAP) $(MOTION_ACTPOS_MIRROR_MAP)
 
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -f $(MACHINE_EXPORTS)

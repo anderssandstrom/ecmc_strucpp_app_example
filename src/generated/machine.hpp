@@ -5551,6 +5551,7 @@ public:
     IEC_BOOL ENABLE_OUTPUT;  // AT %QX0.0
     IEC_INT TARGET_WORD;  // AT %QW2
     IEC_INT COUNTER;  // AT %MW0
+    IEC_INT MANUAL_TARGET;
 
     // Constructor
     Program_MACHINE();

@@ -10376,7 +10376,7 @@ LocatedVar locatedVars[5] = {
 };
 
 Program_MACHINE::Program_MACHINE()
-    : START_BUTTON(false), STOP_BUTTON(false), ENABLE_OUTPUT(false), TARGET_WORD(0), COUNTER(0)
+    : START_BUTTON(false), STOP_BUTTON(false), ENABLE_OUTPUT(false), TARGET_WORD(0), COUNTER(0), MANUAL_TARGET(0)
 {
     // Initialize located variable pointers
     locatedVars[0].pointer = START_BUTTON.raw_ptr();
@@ -10394,7 +10394,11 @@ void Program_MACHINE::run() {
     }
     if (ENABLE_OUTPUT) {
         COUNTER = COUNTER + 1;
-        TARGET_WORD = COUNTER;
+        if (MANUAL_TARGET != 0) {
+            TARGET_WORD = MANUAL_TARGET;
+        } else {
+            TARGET_WORD = COUNTER;
+        }
     } else {
         TARGET_WORD = 0;
     }

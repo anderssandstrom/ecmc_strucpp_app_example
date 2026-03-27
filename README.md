@@ -33,6 +33,8 @@ its `logic_lib=...` config string.
 - [`src/generated/machine.hpp`](src/generated/machine.hpp)
 - [`src/generated/machine.cpp`](src/generated/machine.cpp)
   real generated `STruCpp` output
+- [`src/generated/machine_epics_exports.hpp`](src/generated/machine_epics_exports.hpp)
+  generated export table from `// @epics ...` annotations in the ST source
 - [`src/machine_logic.cpp`](src/machine_logic.cpp)
   tiny ABI wrapper that exposes the memmap sample logic library entry point
 - [`st/el7041_velocity.st`](st/el7041_velocity.st)
@@ -78,7 +80,9 @@ its `logic_lib=...` config string.
 
 In a real application repo, the only handwritten file should normally be the
 logic wrapper. If you want startup-linked `ecmc` maps, add `// @ecmc ...`
-annotations next to the located ST declarations.
+annotations next to the located ST declarations. If you want selected internal
+ST variables visible in EPICS, add `// @epics ...` annotations next to the ST
+variable declarations.
 
 ## Build
 
@@ -101,6 +105,12 @@ make maps
 Those `.map` files are generated from the `// @ecmc <ecmcDataItem>` comments in
 [`st/machine.st`](st/machine.st) and
 [`st/el7041_velocity.st`](st/el7041_velocity.st).
+
+The `machine` sample also generates
+[`src/generated/machine_epics_exports.hpp`](src/generated/machine_epics_exports.hpp)
+from the `// @epics ...` comments in [`st/machine.st`](st/machine.st). That is
+what lets `ecmc_plugin_strucpp` publish `counter` and `manual_target` as EPICS
+asyn parameters directly from the ST source.
 
 The `mc_power_move_abs_logic` sample is different: it is a handwritten C++
 logic library rather than generated ST. That is intentional. It demonstrates
@@ -165,6 +175,18 @@ ECMC_STRUCPP_DECLARE_LOGIC_API("my_logic",
                                strucpp::locatedVars);
 ```
 
+If the ST source also exports EPICS variables, use the export-aware form:
+
+```cpp
+#include "generated/my_program_epics_exports.hpp"
+
+ECMC_STRUCPP_DECLARE_LOGIC_API_WITH_EXPORTS(
+  "my_logic",
+  strucpp::Program_MYPROGRAM,
+  strucpp::locatedVars,
+  ecmcStrucppExports::initProgram_MYPROGRAMExports);
+```
+
 ## Regeneration
 
 The checked-in generated files were produced from [`st/machine.st`](st/machine.st)
@@ -195,8 +217,14 @@ uses channel 1 of an `EL6002` and binds:
 The final plugin load looks like:
 
 ```iocsh
-${SCRIPTEXEC} $(ecmc_plugin_strucpp_DIR)startup.cmd, "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/machine_logic.so,INPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01,OUTPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01,MEMORY_BYTES=64,REPORT=1"
+${SCRIPTEXEC} $(ecmc_plugin_strucpp_DIR)startup.cmd, "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/machine_logic.so,ASYN_PORT=PLUGIN.STRUCPP0,INPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01,OUTPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01,MEMORY_BYTES=64,REPORT=1"
 ```
+
+That sample also exports two internal ST variables on the plugin-owned asyn
+port `PLUGIN.STRUCPP0`:
+
+- `plugin.strucpp.machine.counter` as read-only
+- `plugin.strucpp.machine.manual_target` as writable
 
 There is also an EL7041 velocity example in
 `../ecmc_plugin_strucpp/examples/loadEL7041VelocityExample.cmd` that binds:
