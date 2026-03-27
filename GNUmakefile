@@ -1,15 +1,15 @@
 BUILD_DIR ?= build
-STLIB_DIR := $(BUILD_DIR)/stlib
 
 STRUCPP ?= $(abspath ../strucpp)
 ECMC_PLUGIN_STRUCPP ?= $(abspath ../ecmc_plugin_strucpp)
 PODMAN ?= podman
 NODE_IMAGE ?= docker.io/library/node:20
+ECMC_MOTION_LIB_DIR ?= $(ECMC_PLUGIN_STRUCPP)/libs
+ECMC_MOTION_STLIB := $(ECMC_MOTION_LIB_DIR)/ecmc-motion.stlib
 
 LOGIC_MODULES := machine_logic el7041_velocity_logic motion_actpos_mirror_logic mc_power_move_abs_logic mc_power_move_absolute_lib_logic mc_power_move_velocity_lib_logic mc_power_move_relative_lib_logic
 PYTHON ?= python3
 MAPGEN := $(ECMC_PLUGIN_STRUCPP)/scripts/strucpp_mapgen.py
-PATCH_STLIB_HEADERS := scripts/patch_stlib_headers.py
 
 CXX ?= c++
 CXXFLAGS += -std=c++17 -fPIC -Wall -Wextra
@@ -74,10 +74,9 @@ MC_POWER_MOVE_RELATIVE_LIB_TARGET := $(BUILD_DIR)/mc_power_move_relative_lib_log
 MACHINE_MAP := $(BUILD_DIR)/machine.map
 EL7041_VELOCITY_MAP := $(BUILD_DIR)/el7041_velocity.map
 MOTION_ACTPOS_MIRROR_MAP := $(BUILD_DIR)/motion_actpos_mirror.map
-ECMC_MOTION_STLIB := $(STLIB_DIR)/ecmc-motion.stlib
 TARGETS := $(MACHINE_TARGET) $(EL7041_VELOCITY_TARGET) $(MOTION_ACTPOS_MIRROR_TARGET) $(MC_POWER_MOVE_ABS_TARGET) $(MC_POWER_MOVE_ABSOLUTE_LIB_TARGET) $(MC_POWER_MOVE_VELOCITY_LIB_TARGET) $(MC_POWER_MOVE_RELATIVE_LIB_TARGET) $(MACHINE_MAP) $(EL7041_VELOCITY_MAP) $(MOTION_ACTPOS_MIRROR_MAP)
 
-.PHONY: all clean regen regen-container maps
+.PHONY: all clean regen regen-container maps check-motion-lib
 
 all: $(TARGETS)
 
@@ -125,29 +124,24 @@ $(MOTION_ACTPOS_MIRROR_MAP): src/generated/motion_actpos_mirror.hpp st/motion_ac
 	@mkdir -p $(dir $@)
 	$(PYTHON) $(MAPGEN) --header src/generated/motion_actpos_mirror.hpp --st-source st/motion_actpos_mirror.st --output $@
 
-regen:
+check-motion-lib:
+	@test -f $(ECMC_MOTION_STLIB) || (echo "Missing motion library: $(ECMC_MOTION_STLIB)" >&2; exit 1)
+
+regen: check-motion-lib
 	strucpp st/machine.st -o src/generated/machine.cpp
 	strucpp st/el7041_velocity.st -o src/generated/el7041_velocity.cpp
 	strucpp st/motion_actpos_mirror.st -o src/generated/motion_actpos_mirror.cpp
-	@mkdir -p $(STLIB_DIR)
-	strucpp --compile-lib lib/ecmc_motion.st -o $(STLIB_DIR) --lib-name ecmc-motion --lib-version 0.1.0 --lib-namespace ecmc_motion --no-default-libs
-	$(PYTHON) $(PATCH_STLIB_HEADERS) --stlib $(ECMC_MOTION_STLIB) --header ecmcMcApi.h
-	strucpp st/mc_power_move_absolute_lib.st -o src/generated/mc_power_move_absolute_lib.cpp -L $(STLIB_DIR)
-	strucpp st/mc_power_move_velocity_lib.st -o src/generated/mc_power_move_velocity_lib.cpp -L $(STLIB_DIR)
-	strucpp st/mc_power_move_relative_lib.st -o src/generated/mc_power_move_relative_lib.cpp -L $(STLIB_DIR)
+	strucpp st/mc_power_move_absolute_lib.st -o src/generated/mc_power_move_absolute_lib.cpp -L $(ECMC_MOTION_LIB_DIR)
+	strucpp st/mc_power_move_velocity_lib.st -o src/generated/mc_power_move_velocity_lib.cpp -L $(ECMC_MOTION_LIB_DIR)
+	strucpp st/mc_power_move_relative_lib.st -o src/generated/mc_power_move_relative_lib.cpp -L $(ECMC_MOTION_LIB_DIR)
 
-regen-container:
+regen-container: check-motion-lib
 	$(PODMAN) run --rm \
 		-v $(STRUCPP):/src/strucpp:ro \
 		-v $(CURDIR):/src/app \
+		-v $(ECMC_PLUGIN_STRUCPP):/src/plugin:ro \
 		$(NODE_IMAGE) \
-		bash -lc "set -euo pipefail; cp -R /src/strucpp /tmp/strucpp; cd /tmp/strucpp; npm ci --ignore-scripts; npm run build; mkdir -p /src/app/$(STLIB_DIR); node dist/cli.js /src/app/st/machine.st -o /src/app/src/generated/machine.cpp; node dist/cli.js /src/app/st/el7041_velocity.st -o /src/app/src/generated/el7041_velocity.cpp; node dist/cli.js /src/app/st/motion_actpos_mirror.st -o /src/app/src/generated/motion_actpos_mirror.cpp; node dist/cli.js --compile-lib /src/app/lib/ecmc_motion.st -o /src/app/$(STLIB_DIR) --lib-name ecmc-motion --lib-version 0.1.0 --lib-namespace ecmc_motion --no-default-libs"
-	$(PYTHON) $(PATCH_STLIB_HEADERS) --stlib $(ECMC_MOTION_STLIB) --header ecmcMcApi.h
-	$(PODMAN) run --rm \
-		-v $(STRUCPP):/src/strucpp:ro \
-		-v $(CURDIR):/src/app \
-		$(NODE_IMAGE) \
-		bash -lc "set -euo pipefail; cp -R /src/strucpp /tmp/strucpp; cd /tmp/strucpp; npm ci --ignore-scripts; npm run build; node dist/cli.js /src/app/st/mc_power_move_absolute_lib.st -o /src/app/src/generated/mc_power_move_absolute_lib.cpp -L /src/app/$(STLIB_DIR); node dist/cli.js /src/app/st/mc_power_move_velocity_lib.st -o /src/app/src/generated/mc_power_move_velocity_lib.cpp -L /src/app/$(STLIB_DIR); node dist/cli.js /src/app/st/mc_power_move_relative_lib.st -o /src/app/src/generated/mc_power_move_relative_lib.cpp -L /src/app/$(STLIB_DIR)"
+		bash -lc "set -euo pipefail; cp -R /src/strucpp /tmp/strucpp; cd /tmp/strucpp; npm ci --ignore-scripts; npm run build; node dist/cli.js /src/app/st/machine.st -o /src/app/src/generated/machine.cpp; node dist/cli.js /src/app/st/el7041_velocity.st -o /src/app/src/generated/el7041_velocity.cpp; node dist/cli.js /src/app/st/motion_actpos_mirror.st -o /src/app/src/generated/motion_actpos_mirror.cpp; node dist/cli.js /src/app/st/mc_power_move_absolute_lib.st -o /src/app/src/generated/mc_power_move_absolute_lib.cpp -L /src/plugin/libs; node dist/cli.js /src/app/st/mc_power_move_velocity_lib.st -o /src/app/src/generated/mc_power_move_velocity_lib.cpp -L /src/plugin/libs; node dist/cli.js /src/app/st/mc_power_move_relative_lib.st -o /src/app/src/generated/mc_power_move_relative_lib.cpp -L /src/plugin/libs"
 
 maps: $(MACHINE_MAP) $(EL7041_VELOCITY_MAP) $(MOTION_ACTPOS_MIRROR_MAP)
 

@@ -52,11 +52,8 @@ its `logic_lib=...` config string.
 - [`src/mc_power_move_abs_logic.cpp`](src/mc_power_move_abs_logic.cpp)
   manual logic-library example that uses `MC_Power`, `MC_MoveAbsolute`, and
   `MC_ReadActualPosition` through [`ecmcStrucppMcWrapper.hpp`](../ecmc_plugin_strucpp/src/ecmcStrucppMcWrapper.hpp)
-- [`lib/ecmc_motion.st`](lib/ecmc_motion.st)
-  local `STruCpp` motion library source that defines `ECMC_AXIS_REF`,
-  `MC_Power`, `MC_MoveAbsolute`, and `MC_ReadActualPosition`
 - [`st/mc_power_move_absolute_lib.st`](st/mc_power_move_absolute_lib.st)
-  real ST sample program using the local motion library
+  real ST sample program using the shared motion library
 - [`src/generated/mc_power_move_absolute_lib.hpp`](src/generated/mc_power_move_absolute_lib.hpp)
 - [`src/generated/mc_power_move_absolute_lib.cpp`](src/generated/mc_power_move_absolute_lib.cpp)
   generated `STruCpp` output for the motion-library sample
@@ -78,8 +75,6 @@ its `logic_lib=...` config string.
   generated `STruCpp` output for the motion relative sample
 - [`src/mc_power_move_relative_lib_logic.cpp`](src/mc_power_move_relative_lib_logic.cpp)
   tiny ABI wrapper for the motion relative sample
-- [`scripts/patch_stlib_headers.py`](scripts/patch_stlib_headers.py)
-  helper that restores required external headers inside the compiled `.stlib`
 
 In a real application repo, the only handwritten file should normally be the
 logic wrapper. If you want startup-linked `ecmc` maps, add `// @ecmc ...`
@@ -113,7 +108,8 @@ the new PLCopen-style `MC_*` wrapper path without assuming external function
 block support in `STruCpp`.
 
 There is now also a real ST-based motion sample, `mc_power_move_absolute_lib`.
-That path uses a local `.stlib` library compiled from [`lib/ecmc_motion.st`](lib/ecmc_motion.st).
+That path uses the reusable bundled motion library from
+[`../ecmc_plugin_strucpp/libs/ecmc-motion.stlib`](../ecmc_plugin_strucpp/libs/ecmc-motion.stlib).
 The library function blocks call into [`ecmcMcApi.h`](../ecmc/devEcmcSup/motion/ecmcMcApi.h)
 through `STruCpp` `{external ...}` blocks.
 
@@ -130,9 +126,9 @@ The library now exposes a more useful first subset:
 - `MC_ReadActualPosition`
 - `MC_ReadActualVelocity`
 
-`STruCpp` currently clears `manifest.headers` when producing a `.stlib`, so the
-sample build patches the archive afterward to restore `ecmcMcApi.h`. That keeps
-the consumer compile generic without carrying a private fork of `STruCpp`.
+The sample app no longer rebuilds that library itself. It just consumes the
+shared `.stlib` from `ecmc_plugin_strucpp`, which keeps rebuilds shorter and
+avoids per-app duplication.
 
 It uses one contiguous input image and one contiguous output image with this
 layout, hard-wired to axis `0`:
@@ -260,9 +256,23 @@ layout as the handwritten `mc_power_move_abs_logic` example:
 So it also wants an input buffer of at least `40` bytes and an output buffer of
 at least `16` bytes.
 
-## Motion Library Regeneration
+## Motion Library
 
-To rebuild the local motion `.stlib` and regenerate the ST-based motion sample:
+The reusable motion library now lives in
+[`../ecmc_plugin_strucpp`](../ecmc_plugin_strucpp):
+
+- [`../ecmc_plugin_strucpp/lib/ecmc_motion.st`](../ecmc_plugin_strucpp/lib/ecmc_motion.st)
+- [`../ecmc_plugin_strucpp/libs/ecmc-motion.stlib`](../ecmc_plugin_strucpp/libs/ecmc-motion.stlib)
+- [`../ecmc_plugin_strucpp/templates/mc_move_absolute_template.st`](../ecmc_plugin_strucpp/templates/mc_move_absolute_template.st)
+- [`../ecmc_plugin_strucpp/templates/motion_logic_wrapper_template.cpp`](../ecmc_plugin_strucpp/templates/motion_logic_wrapper_template.cpp)
+
+By default this sample app consumes `$(ECMC_PLUGIN_STRUCPP)/libs` as its motion
+library path. If you keep the default sibling-repo layout, no extra setup is
+needed beyond building `ecmc_plugin_strucpp`.
+
+## Regeneration
+
+To regenerate the checked-in generated files:
 
 ```sh
 make regen
@@ -274,15 +284,22 @@ or with Podman:
 make regen-container
 ```
 
-That produces:
-
-- `build/stlib/ecmc-motion.stlib`
-- `src/generated/mc_power_move_absolute_lib.hpp`
-- `src/generated/mc_power_move_absolute_lib.cpp`
+`regen-container` now builds `strucpp` once and regenerates all sample programs
+in one container run.
 
 For IOC use, point `LOGIC_LIB` at `build/mc_power_move_absolute_lib_logic.*`
 and use the same contiguous input/output image sizes as the handwritten motion
 sample.
+
+## Quick Start
+
+For a new motion app:
+
+1. Copy [`../ecmc_plugin_strucpp/templates/mc_move_absolute_template.st`](../ecmc_plugin_strucpp/templates/mc_move_absolute_template.st) into `st/`.
+2. Copy [`../ecmc_plugin_strucpp/templates/motion_logic_wrapper_template.cpp`](../ecmc_plugin_strucpp/templates/motion_logic_wrapper_template.cpp) into `src/`.
+3. Rename the program/wrapper identifiers and set `axis.AxisIndex`.
+4. Regenerate with `make regen-container`.
+5. Build with `make all`.
 
 There is also a velocity-oriented ST sample, `mc_power_move_velocity_lib`, with
 this layout:
