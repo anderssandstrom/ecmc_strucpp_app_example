@@ -6,7 +6,7 @@ ECMC_PLUGIN_STRUCPP ?= $(abspath ../ecmc_plugin_strucpp)
 PODMAN ?= podman
 NODE_IMAGE ?= docker.io/library/node:20
 
-LOGIC_MODULES := machine_logic el7041_velocity_logic motion_actpos_mirror_logic mc_power_move_abs_logic mc_power_move_absolute_lib_logic
+LOGIC_MODULES := machine_logic el7041_velocity_logic motion_actpos_mirror_logic mc_power_move_abs_logic mc_power_move_absolute_lib_logic mc_power_move_velocity_lib_logic mc_power_move_relative_lib_logic
 PYTHON ?= python3
 MAPGEN := $(ECMC_PLUGIN_STRUCPP)/scripts/strucpp_mapgen.py
 PATCH_STLIB_HEADERS := scripts/patch_stlib_headers.py
@@ -48,22 +48,34 @@ MC_POWER_MOVE_ABSOLUTE_LIB_SOURCES := \
 	src/generated/mc_power_move_absolute_lib.cpp \
 	src/mc_power_move_absolute_lib_logic.cpp
 
+MC_POWER_MOVE_VELOCITY_LIB_SOURCES := \
+	src/generated/mc_power_move_velocity_lib.cpp \
+	src/mc_power_move_velocity_lib_logic.cpp
+
+MC_POWER_MOVE_RELATIVE_LIB_SOURCES := \
+	src/generated/mc_power_move_relative_lib.cpp \
+	src/mc_power_move_relative_lib_logic.cpp
+
 MACHINE_OBJECTS := $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(MACHINE_SOURCES))
 EL7041_VELOCITY_OBJECTS := $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(EL7041_VELOCITY_SOURCES))
 MOTION_ACTPOS_MIRROR_OBJECTS := $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(MOTION_ACTPOS_MIRROR_SOURCES))
 MC_POWER_MOVE_ABS_OBJECTS := $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(MC_POWER_MOVE_ABS_SOURCES))
 MC_POWER_MOVE_ABSOLUTE_LIB_OBJECTS := $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(MC_POWER_MOVE_ABSOLUTE_LIB_SOURCES))
+MC_POWER_MOVE_VELOCITY_LIB_OBJECTS := $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(MC_POWER_MOVE_VELOCITY_LIB_SOURCES))
+MC_POWER_MOVE_RELATIVE_LIB_OBJECTS := $(patsubst src/%.cpp,$(BUILD_DIR)/%.o,$(MC_POWER_MOVE_RELATIVE_LIB_SOURCES))
 
 MACHINE_TARGET := $(BUILD_DIR)/machine_logic.$(LIBEXT)
 EL7041_VELOCITY_TARGET := $(BUILD_DIR)/el7041_velocity_logic.$(LIBEXT)
 MOTION_ACTPOS_MIRROR_TARGET := $(BUILD_DIR)/motion_actpos_mirror_logic.$(LIBEXT)
 MC_POWER_MOVE_ABS_TARGET := $(BUILD_DIR)/mc_power_move_abs_logic.$(LIBEXT)
 MC_POWER_MOVE_ABSOLUTE_LIB_TARGET := $(BUILD_DIR)/mc_power_move_absolute_lib_logic.$(LIBEXT)
+MC_POWER_MOVE_VELOCITY_LIB_TARGET := $(BUILD_DIR)/mc_power_move_velocity_lib_logic.$(LIBEXT)
+MC_POWER_MOVE_RELATIVE_LIB_TARGET := $(BUILD_DIR)/mc_power_move_relative_lib_logic.$(LIBEXT)
 MACHINE_MAP := $(BUILD_DIR)/machine.map
 EL7041_VELOCITY_MAP := $(BUILD_DIR)/el7041_velocity.map
 MOTION_ACTPOS_MIRROR_MAP := $(BUILD_DIR)/motion_actpos_mirror.map
 ECMC_MOTION_STLIB := $(STLIB_DIR)/ecmc-motion.stlib
-TARGETS := $(MACHINE_TARGET) $(EL7041_VELOCITY_TARGET) $(MOTION_ACTPOS_MIRROR_TARGET) $(MC_POWER_MOVE_ABS_TARGET) $(MC_POWER_MOVE_ABSOLUTE_LIB_TARGET) $(MACHINE_MAP) $(EL7041_VELOCITY_MAP) $(MOTION_ACTPOS_MIRROR_MAP)
+TARGETS := $(MACHINE_TARGET) $(EL7041_VELOCITY_TARGET) $(MOTION_ACTPOS_MIRROR_TARGET) $(MC_POWER_MOVE_ABS_TARGET) $(MC_POWER_MOVE_ABSOLUTE_LIB_TARGET) $(MC_POWER_MOVE_VELOCITY_LIB_TARGET) $(MC_POWER_MOVE_RELATIVE_LIB_TARGET) $(MACHINE_MAP) $(EL7041_VELOCITY_MAP) $(MOTION_ACTPOS_MIRROR_MAP)
 
 .PHONY: all clean regen regen-container maps
 
@@ -89,6 +101,14 @@ $(MC_POWER_MOVE_ABSOLUTE_LIB_TARGET): $(MC_POWER_MOVE_ABSOLUTE_LIB_OBJECTS)
 	@mkdir -p $(dir $@)
 	$(CXX) $(MC_POWER_MOVE_ABSOLUTE_LIB_OBJECTS) $(LDFLAGS) -o $@
 
+$(MC_POWER_MOVE_VELOCITY_LIB_TARGET): $(MC_POWER_MOVE_VELOCITY_LIB_OBJECTS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(MC_POWER_MOVE_VELOCITY_LIB_OBJECTS) $(LDFLAGS) -o $@
+
+$(MC_POWER_MOVE_RELATIVE_LIB_TARGET): $(MC_POWER_MOVE_RELATIVE_LIB_OBJECTS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(MC_POWER_MOVE_RELATIVE_LIB_OBJECTS) $(LDFLAGS) -o $@
+
 $(BUILD_DIR)/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
@@ -113,6 +133,8 @@ regen:
 	strucpp --compile-lib lib/ecmc_motion.st -o $(STLIB_DIR) --lib-name ecmc-motion --lib-version 0.1.0 --lib-namespace ecmc_motion --no-default-libs
 	$(PYTHON) $(PATCH_STLIB_HEADERS) --stlib $(ECMC_MOTION_STLIB) --header ecmcMcApi.h
 	strucpp st/mc_power_move_absolute_lib.st -o src/generated/mc_power_move_absolute_lib.cpp -L $(STLIB_DIR)
+	strucpp st/mc_power_move_velocity_lib.st -o src/generated/mc_power_move_velocity_lib.cpp -L $(STLIB_DIR)
+	strucpp st/mc_power_move_relative_lib.st -o src/generated/mc_power_move_relative_lib.cpp -L $(STLIB_DIR)
 
 regen-container:
 	$(PODMAN) run --rm \
@@ -125,7 +147,7 @@ regen-container:
 		-v $(STRUCPP):/src/strucpp:ro \
 		-v $(CURDIR):/src/app \
 		$(NODE_IMAGE) \
-		bash -lc "set -euo pipefail; cp -R /src/strucpp /tmp/strucpp; cd /tmp/strucpp; npm ci --ignore-scripts; npm run build; node dist/cli.js /src/app/st/mc_power_move_absolute_lib.st -o /src/app/src/generated/mc_power_move_absolute_lib.cpp -L /src/app/$(STLIB_DIR)"
+		bash -lc "set -euo pipefail; cp -R /src/strucpp /tmp/strucpp; cd /tmp/strucpp; npm ci --ignore-scripts; npm run build; node dist/cli.js /src/app/st/mc_power_move_absolute_lib.st -o /src/app/src/generated/mc_power_move_absolute_lib.cpp -L /src/app/$(STLIB_DIR); node dist/cli.js /src/app/st/mc_power_move_velocity_lib.st -o /src/app/src/generated/mc_power_move_velocity_lib.cpp -L /src/app/$(STLIB_DIR); node dist/cli.js /src/app/st/mc_power_move_relative_lib.st -o /src/app/src/generated/mc_power_move_relative_lib.cpp -L /src/app/$(STLIB_DIR)"
 
 maps: $(MACHINE_MAP) $(EL7041_VELOCITY_MAP) $(MOTION_ACTPOS_MIRROR_MAP)
 

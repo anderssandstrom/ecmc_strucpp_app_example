@@ -15,6 +15,10 @@ It builds one loadable logic library:
 - or `build/mc_power_move_abs_logic.dylib` on macOS
 - `build/mc_power_move_absolute_lib_logic.so`
 - or `build/mc_power_move_absolute_lib_logic.dylib` on macOS
+- `build/mc_power_move_velocity_lib_logic.so`
+- or `build/mc_power_move_velocity_lib_logic.dylib` on macOS
+- `build/mc_power_move_relative_lib_logic.so`
+- or `build/mc_power_move_relative_lib_logic.dylib` on macOS
 - `build/machine.map`
 - `build/el7041_velocity.map`
 - `build/motion_actpos_mirror.map`
@@ -58,6 +62,22 @@ its `logic_lib=...` config string.
   generated `STruCpp` output for the motion-library sample
 - [`src/mc_power_move_absolute_lib_logic.cpp`](src/mc_power_move_absolute_lib_logic.cpp)
   tiny ABI wrapper for the motion-library sample
+- [`st/mc_power_move_velocity_lib.st`](st/mc_power_move_velocity_lib.st)
+  real ST sample program using `MC_Power`, `MC_MoveVelocity`, `MC_ReadStatus`,
+  and `MC_ReadActualVelocity`
+- [`src/generated/mc_power_move_velocity_lib.hpp`](src/generated/mc_power_move_velocity_lib.hpp)
+- [`src/generated/mc_power_move_velocity_lib.cpp`](src/generated/mc_power_move_velocity_lib.cpp)
+  generated `STruCpp` output for the motion velocity sample
+- [`src/mc_power_move_velocity_lib_logic.cpp`](src/mc_power_move_velocity_lib_logic.cpp)
+  tiny ABI wrapper for the motion velocity sample
+- [`st/mc_power_move_relative_lib.st`](st/mc_power_move_relative_lib.st)
+  real ST sample program using `MC_Power`, `MC_MoveRelative`, `MC_ReadStatus`,
+  and `MC_ReadActualPosition`
+- [`src/generated/mc_power_move_relative_lib.hpp`](src/generated/mc_power_move_relative_lib.hpp)
+- [`src/generated/mc_power_move_relative_lib.cpp`](src/generated/mc_power_move_relative_lib.cpp)
+  generated `STruCpp` output for the motion relative sample
+- [`src/mc_power_move_relative_lib_logic.cpp`](src/mc_power_move_relative_lib_logic.cpp)
+  tiny ABI wrapper for the motion relative sample
 - [`scripts/patch_stlib_headers.py`](scripts/patch_stlib_headers.py)
   helper that restores required external headers inside the compiled `.stlib`
 
@@ -96,6 +116,19 @@ There is now also a real ST-based motion sample, `mc_power_move_absolute_lib`.
 That path uses a local `.stlib` library compiled from [`lib/ecmc_motion.st`](lib/ecmc_motion.st).
 The library function blocks call into [`ecmcMcApi.h`](../ecmc/devEcmcSup/motion/ecmcMcApi.h)
 through `STruCpp` `{external ...}` blocks.
+
+The library now exposes a more useful first subset:
+
+- `MC_Power`
+- `MC_Reset`
+- `MC_MoveAbsolute`
+- `MC_MoveRelative`
+- `MC_MoveVelocity`
+- `MC_Home`
+- `MC_Halt`
+- `MC_ReadStatus`
+- `MC_ReadActualPosition`
+- `MC_ReadActualVelocity`
 
 `STruCpp` currently clears `manifest.headers` when producing a `.stlib`, so the
 sample build patches the archive afterward to restore `ecmcMcApi.h`. That keeps
@@ -250,3 +283,52 @@ That produces:
 For IOC use, point `LOGIC_LIB` at `build/mc_power_move_absolute_lib_logic.*`
 and use the same contiguous input/output image sizes as the handwritten motion
 sample.
+
+There is also a velocity-oriented ST sample, `mc_power_move_velocity_lib`, with
+this layout:
+
+- Inputs:
+  - `%IX0.0` `enableCmd`
+  - `%IX0.1` `executeCmd`
+  - `%IL8` `velocityCmd`
+  - `%IL16` `accelCmd`
+  - `%IL24` `decelCmd`
+- Outputs:
+  - `%QX0.0` `powerStatus`
+  - `%QX0.1` `powerValid`
+  - `%QX0.2` `inVelocity`
+  - `%QX0.3` `moveBusy`
+  - `%QX0.4` `moveError`
+  - `%QX0.5` `standStill`
+  - `%QX0.6` `contMotion`
+  - `%QX0.7` `errorStop`
+  - `%QD4` `moveErrorId`
+  - `%QL8` `actualVel`
+
+So it wants an input buffer of at least `32` bytes and an output buffer of at
+least `16` bytes.
+
+There is also a relative-move ST sample, `mc_power_move_relative_lib`, with
+this layout:
+
+- Inputs:
+  - `%IX0.0` `enableCmd`
+  - `%IX0.1` `executeCmd`
+  - `%IL8` `distanceCmd`
+  - `%IL16` `velocityCmd`
+  - `%IL24` `accelCmd`
+  - `%IL32` `decelCmd`
+- Outputs:
+  - `%QX0.0` `powerStatus`
+  - `%QX0.1` `powerValid`
+  - `%QX0.2` `moveBusy`
+  - `%QX0.3` `moveDone`
+  - `%QX0.4` `moveError`
+  - `%QX0.5` `standStill`
+  - `%QX0.6` `discreteMove`
+  - `%QX0.7` `errorStop`
+  - `%QD4` `moveErrorId`
+  - `%QL8` `actualPos`
+
+So it wants an input buffer of at least `40` bytes and an output buffer of at
+least `16` bytes.
