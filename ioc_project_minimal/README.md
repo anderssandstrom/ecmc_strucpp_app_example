@@ -15,6 +15,13 @@ The source tree is:
 - [`src/main.st`](src/main.st)
 - [`src/Makefile`](src/Makefile)
 
+This minimal example also shows both annotation-placeholder styles:
+
+- inline default in ST:
+  - `ec.s${SLAVE_ID=14}...`
+- required build-time define from `src/Makefile`:
+  - `ANNOTATION_DEFINES := CH_ID=01`
+
 The expected flow is:
 
 1. `make`
@@ -42,6 +49,17 @@ The concrete sample maps directly to EL7041 PDO items:
 - `%IW0` -> `ec.s14.positionActual01`
 - `%QW0` -> `ec.s14.driveControl01`
 - `%QW2` -> `ec.s14.velocitySetpoint01`
+
+So in this example:
+
+- `SLAVE_ID` defaults to `14` inside the ST annotations
+- `CH_ID` comes from `ANNOTATION_DEFINES`
+
+If needed, you can override both at build time, for example:
+
+```sh
+make ANNOTATION_DEFINES="SLAVE_ID=18 CH_ID=01"
+```
 
 So this example is deliberately showing the direct EtherCAT-data path rather
 than the older contiguous memmap path.

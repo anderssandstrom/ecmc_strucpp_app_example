@@ -1,8 +1,8 @@
 PROGRAM MAIN
 VAR
-  actual_position    AT %IW0 : INT;   // @ecmc ec.s14.positionActual01
-  drive_control      AT %QW0 : WORD;  // @ecmc ec.s14.driveControl01
-  velocity_setpoint  AT %QW2 : INT;   // @ecmc ec.s14.velocitySetpoint01
+  actual_position    AT %IW0 : INT;   // @ecmc ec.s${SLAVE_ID=14}.positionActual${CH_ID}
+  drive_control      AT %QW0 : WORD;  // @ecmc ec.s${SLAVE_ID=14}.driveControl${CH_ID}
+  velocity_setpoint  AT %QW2 : INT;   // @ecmc ec.s${SLAVE_ID=14}.velocitySetpoint${CH_ID}
   cycle_counter      AT %MW0 : INT;   // @epics
   actual_pos_export           : INT;   // @epics
 END_VAR
