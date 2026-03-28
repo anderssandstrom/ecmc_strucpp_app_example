@@ -1,0 +1,11 @@
+# Best-guess startup script for a gfa-iocutils-managed IOC project.
+#
+# The logic library path points at the installed IOC-local bin directory.
+# In mapping mode the plugin defaults to:
+#   ${LOGIC_LIB}.map
+# and for EPICS exports it defaults to:
+#   ${LOGIC_LIB}.substitutions
+
+epicsEnvSet(STRUCPP_LOGIC_LIB,"bin/machine_logic.so")
+
+require ecmc_plugin_strucpp sandst_a "PLUGIN_ID=0,LOGIC_LIB=${STRUCPP_LOGIC_LIB},REPORT=1"

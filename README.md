@@ -82,6 +82,10 @@ its `logic_lib=...` config string.
   generated `STruCpp` output for the motion relative sample
 - [`src/mc_power_move_relative_lib_logic.cpp`](src/mc_power_move_relative_lib_logic.cpp)
   tiny ABI wrapper for the motion relative sample
+- [`ioc_project_example`](ioc_project_example)
+  best-guess `gfa-iocutils`-style IOC project layout that keeps Structured Text
+  in an IOC project, stages the runtime artifacts into a top-level `bin/`
+  directory, and then runs `ioc install`
 
 In a real application repo, the only handwritten file should normally be the
 logic wrapper. If you want startup-linked `ecmc` maps, add `// @ecmc ...`
@@ -127,6 +131,39 @@ on macOS or `build/machine_logic.so.substitutions` on Linux, via
 That substitutions file references the generic templates shipped by
 [`ecmc_plugin_strucpp`](../ecmc_plugin_strucpp), so the ST source can also be
 the single source of truth for the EPICS record layer.
+
+## IOC Project Example
+
+The directory [`ioc_project_example`](ioc_project_example) is a best-guess
+example for a `gfa-iocutils`-managed IOC project.
+
+The important assumptions behind that example are:
+
+- `ioc install` deploys files, but does not run the `strucpp` generation/build
+  step for you
+- compiled IOC libraries are expected to come from `src/O.<epics_ver>_<arch>`
+  and are installed into the IOC `bin/` directory
+- `.map` and `.substitutions` are not special install file types in
+  `gfa-iocutils`
+
+So the example project does this:
+
+- keeps the ST source and wrapper in [`ioc_project_example/src`](ioc_project_example/src)
+- builds the logic library plus `${LOGIC_LIB}.map` and
+  `${LOGIC_LIB}.substitutions`
+- stages those runtime artifacts into [`ioc_project_example/bin`](ioc_project_example/bin)
+- uses [`STRUCPP-IOC-EXAMPLE_startup.script`](ioc_project_example/STRUCPP-IOC-EXAMPLE_startup.script)
+  to load `bin/machine_logic.so`
+
+That choice is deliberate. If the `.map` and `.substitutions` files were placed
+in `cfg/`, then startup would need explicit `MAPPING_FILE=cfg/...` and
+`EPICS_SUBST=cfg/...` arguments. By staging them in `bin/` next to the logic
+library, the default plugin conventions work:
+
+- `${LOGIC_LIB}.map`
+- `${LOGIC_LIB}.substitutions`
+
+So the default mapping/export startup path stays minimal.
 
 The `mc_power_move_abs_logic` sample is different: it is a handwritten C++
 logic library rather than generated ST. That is intentional. It demonstrates
