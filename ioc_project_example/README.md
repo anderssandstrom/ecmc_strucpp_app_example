@@ -7,8 +7,7 @@ It is intentionally separate from the main sample app build in the repo. The
 goal is to show one plausible IOC-project layout:
 
 - top-level IOC project files for `gfa-iocutils`
-- a `src/` subtree that builds the ST logic library plus generated `.map` and
-  `.substitutions` files
+- a `src/` subtree with one ST file and one short `Makefile`
 - a top-level `bin/` staging directory containing the runtime artifacts that
   should end up in the installed IOC
 - a startup script that loads `ecmc_plugin_strucpp` through `require`
@@ -45,3 +44,17 @@ directory before installation. The installed startup script can then point at
 
 - `bin/machine_logic.so.map`
 - `bin/machine_logic.so.substitutions`
+
+To reduce boilerplate further, the example now uses the reusable helper from:
+
+- [`../../ecmc_plugin_strucpp/templates/strucpp_ioc_logic.make`](../../ecmc_plugin_strucpp/templates/strucpp_ioc_logic.make)
+
+So `src/Makefile` only sets:
+
+```make
+PROGRAM := machine
+ECMC_PLUGIN_STRUCPP ?= ../../../ecmc_plugin_strucpp
+include $(ECMC_PLUGIN_STRUCPP)/templates/strucpp_ioc_logic.make
+```
+
+The logic wrapper source is generated automatically from `machine.st`.

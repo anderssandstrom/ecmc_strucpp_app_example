@@ -155,6 +155,12 @@ So the example project does this:
 - uses [`STRUCPP-IOC-EXAMPLE_startup.script`](ioc_project_example/STRUCPP-IOC-EXAMPLE_startup.script)
   to load `bin/machine_logic.so`
 
+The example now uses the reusable helper shipped by
+[`ecmc_plugin_strucpp`](../ecmc_plugin_strucpp):
+
+- [`templates/strucpp_ioc_logic.make`](../ecmc_plugin_strucpp/templates/strucpp_ioc_logic.make)
+- [`scripts/strucpp_logic_wrappergen.py`](../ecmc_plugin_strucpp/scripts/strucpp_logic_wrappergen.py)
+
 That choice is deliberate. If the `.map` and `.substitutions` files were placed
 in `cfg/`, then startup would need explicit `MAPPING_FILE=cfg/...` and
 `EPICS_SUBST=cfg/...` arguments. By staging them in `bin/` next to the logic
