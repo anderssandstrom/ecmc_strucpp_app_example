@@ -108,6 +108,11 @@ annotations next to the located ST declarations. If you want selected internal
 ST variables visible in EPICS, add `// @epics ...` annotations next to the ST
 variable declarations.
 
+If you do not want to hand-write the located declarations, use
+[`strucpp_declgen.py`](../ecmc_plugin_strucpp/scripts/strucpp_declgen.py)
+from `ecmc_plugin_strucpp` to generate the `VAR` block or a starter `main.st`
+from a short direct-mapping manifest.
+
 ## Build
 
 ```sh
