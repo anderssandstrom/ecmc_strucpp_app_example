@@ -66,6 +66,15 @@ This example also shows a split ST project:
 - [`src/machine.st`](src/machine.st)
   final `PROGRAM`
 
+The concrete sample now maps directly to EL7041 EtherCAT items:
+
+- `%IW0` -> `ec0.s14.positionActual01`
+- `%QW0` -> `ec0.s14.driveControl01`
+- `%QW2` -> `ec0.s14.velocitySetpoint01`
+
+So this richer IOC example also follows the preferred direct item-mapping
+workflow rather than using memmaps.
+
 If needed, the shared helper can also be extended with handwritten C++ by
 setting:
 

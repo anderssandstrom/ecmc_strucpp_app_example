@@ -5,6 +5,11 @@
 #   ${LOGIC_LIB}.map
 # and for EPICS exports it defaults to:
 #   ${LOGIC_LIB}.substitutions
+#
+# This sample expects direct EL7041 PDO items:
+#   %IW0 -> ec0.s14.positionActual01
+#   %QW0 -> ec0.s14.driveControl01
+#   %QW2 -> ec0.s14.velocitySetpoint01
 
 epicsEnvSet(STRUCPP_LOGIC_LIB,"bin/machine_logic.so")
 

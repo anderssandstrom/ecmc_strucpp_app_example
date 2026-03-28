@@ -158,6 +158,12 @@ So the example project does this:
 - uses [`STRUCPP-IOC-EXAMPLE_startup.script`](ioc_project_example/STRUCPP-IOC-EXAMPLE_startup.script)
   to load `bin/machine_logic.so`
 
+The richer IOC example now also maps directly to EL7041 EtherCAT items:
+
+- `ec0.s14.positionActual01`
+- `ec0.s14.driveControl01`
+- `ec0.s14.velocitySetpoint01`
+
 The example now uses the reusable helper shipped by
 [`ecmc_plugin_strucpp`](../ecmc_plugin_strucpp):
 

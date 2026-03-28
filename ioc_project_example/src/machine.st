@@ -1,30 +1,24 @@
 PROGRAM MACHINE
 VAR
-  start_button   AT %IX0.0 : BOOL;  // @ecmc ec0.s2.mm.inputDataArray01
-  stop_button    AT %IX0.1 : BOOL;  // @ecmc ec0.s2.mm.inputDataArray01
-  enable_output  AT %QX0.0 : BOOL;  // @ecmc ec0.s2.mm.outputDataArray01
-  target_word    AT %QW2   : INT;   // @ecmc ec0.s2.mm.outputDataArray01
-  counter        AT %MW0   : INT;   // @epics plugin.strucpp.machine.counter
-  manual_target            : INT;   // @epics plugin.strucpp.machine.manual_target rw
-  counter_fb               : COUNTER_FB;
+  actual_position    AT %IW0 : INT;   // @ecmc ec0.s14.positionActual01
+  drive_control      AT %QW0 : WORD;  // @ecmc ec0.s14.driveControl01
+  velocity_setpoint  AT %QW2 : INT;   // @ecmc ec0.s14.velocitySetpoint01
+  cycle_counter      AT %MW0 : INT;   // @epics plugin.strucpp.machine.cycle_counter
+  manual_velocity             : INT;   // @epics plugin.strucpp.machine.manual_velocity rw
+  actual_pos_export           : INT;   // @epics plugin.strucpp.machine.actual_position
+  counter_fb                  : COUNTER_FB;
 END_VAR
 
-IF stop_button THEN
-  enable_output := FALSE;
-ELSIF start_button THEN
-  enable_output := TRUE;
-END_IF;
+actual_pos_export := actual_position;
+drive_control := 16#0001;
+counter_fb(Enable := TRUE);
+cycle_counter := counter_fb.Value;
 
-counter_fb(Enable := enable_output);
-counter := counter_fb.Value;
-
-IF enable_output THEN
-  IF manual_target <> 0 THEN
-    target_word := manual_target;
-  ELSE
-    target_word := counter;
-  END_IF;
+IF manual_velocity <> 0 THEN
+  velocity_setpoint := manual_velocity;
+ELSIF actual_position < 1000 THEN
+  velocity_setpoint := 1000;
 ELSE
-  target_word := 0;
+  velocity_setpoint := -1000;
 END_IF;
 END_PROGRAM
