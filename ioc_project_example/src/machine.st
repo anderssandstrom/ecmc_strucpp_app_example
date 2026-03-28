@@ -6,6 +6,7 @@ VAR
   target_word    AT %QW2   : INT;   // @ecmc ec0.s2.mm.outputDataArray01
   counter        AT %MW0   : INT;   // @epics plugin.strucpp.machine.counter
   manual_target            : INT;   // @epics plugin.strucpp.machine.manual_target rw
+  counter_fb               : COUNTER_FB;
 END_VAR
 
 IF stop_button THEN
@@ -14,8 +15,10 @@ ELSIF start_button THEN
   enable_output := TRUE;
 END_IF;
 
+counter_fb(Enable := enable_output);
+counter := counter_fb.Value;
+
 IF enable_output THEN
-  counter := counter + 1;
   IF manual_target <> 0 THEN
     target_word := manual_target;
   ELSE

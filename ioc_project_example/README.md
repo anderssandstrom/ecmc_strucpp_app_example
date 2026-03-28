@@ -53,8 +53,15 @@ So `src/Makefile` only sets:
 
 ```make
 PROGRAM := machine
+ST_SOURCES := machine_counter_fb.st machine.st
 ECMC_PLUGIN_STRUCPP ?= ../../../ecmc_plugin_strucpp
 include $(ECMC_PLUGIN_STRUCPP)/templates/strucpp_ioc_logic.make
 ```
 
-The logic wrapper source is generated automatically from `machine.st`.
+The logic wrapper source is generated automatically from the bundled ST source.
+This example also shows a split ST project:
+
+- [`src/machine_counter_fb.st`](src/machine_counter_fb.st)
+  reusable helper FB
+- [`src/machine.st`](src/machine.st)
+  final `PROGRAM`
