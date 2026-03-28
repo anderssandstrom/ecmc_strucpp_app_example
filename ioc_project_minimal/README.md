@@ -57,6 +57,8 @@ So in this example:
 
 - `SLAVE_ID` defaults to `14` inside the ST annotations
 - `CH_ID` comes from `ANNOTATION_DEFINES`
+- the simple logic drives the axis back and forth between positions `0` and
+  `1000`
 
 If needed, you can override both at build time, for example:
 
