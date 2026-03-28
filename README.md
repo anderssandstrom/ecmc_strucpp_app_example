@@ -11,6 +11,8 @@ It builds one loadable logic library:
 - or `build/el7041_velocity_logic.dylib` on macOS
 - `build/motion_actpos_mirror_logic.so`
 - or `build/motion_actpos_mirror_logic.dylib` on macOS
+- `build/motion_velocity_direct_logic.so`
+- or `build/motion_velocity_direct_logic.dylib` on macOS
 - `build/mc_power_move_abs_logic.so`
 - or `build/mc_power_move_abs_logic.dylib` on macOS
 - `build/mc_power_move_absolute_lib_logic.so`
@@ -27,6 +29,8 @@ It builds one loadable logic library:
 - or `build/el7041_velocity_logic.dylib.map` on macOS
 - `build/motion_actpos_mirror_logic.so.map`
 - or `build/motion_actpos_mirror_logic.dylib.map` on macOS
+- `build/motion_velocity_direct_logic.so.map`
+- or `build/motion_velocity_direct_logic.dylib.map` on macOS
 
 Those logic libraries are what the generic `ecmc_plugin_strucpp` host loads through
 its `logic_lib=...` config string.
@@ -56,6 +60,14 @@ its `logic_lib=...` config string.
   real generated `STruCpp` output for the motion-data sample
 - [`src/motion_actpos_mirror_logic.cpp`](src/motion_actpos_mirror_logic.cpp)
   wrapper for the motion-data logic library
+- [`st/motion_velocity_direct.st`](st/motion_velocity_direct.st)
+  direct-mapped motion sample using `ax1.enc.actpos`, `ax1.traj.targetvel`,
+  and `ax1.drv.enable`
+- [`src/generated/motion_velocity_direct.hpp`](src/generated/motion_velocity_direct.hpp)
+- [`src/generated/motion_velocity_direct.cpp`](src/generated/motion_velocity_direct.cpp)
+  generated `STruCpp` output for the direct-mapped motion sample
+- [`src/motion_velocity_direct_logic.cpp`](src/motion_velocity_direct_logic.cpp)
+  wrapper for the direct-mapped motion logic library
 - [`src/mc_power_move_abs_logic.cpp`](src/mc_power_move_abs_logic.cpp)
   manual logic-library example that uses `MC_Power`, `MC_MoveAbsolute`, and
   `MC_ReadActualPosition` through [`ecmcStrucppMcWrapper.hpp`](../ecmc_plugin_strucpp/src/ecmcStrucppMcWrapper.hpp)
@@ -109,6 +121,10 @@ Defaults:
 
 `make all` now builds all logic libraries and all generated `.map` files next
 to the corresponding logic library.
+The shared helper workflow also generates `${LOGIC_LIB}.summary.txt` reports
+and supports `make validate` for dry-run checking before runtime. This sample
+repo still uses its own makefile, but the same generators and stricter checks
+apply to the generated `.map` and `.substitutions` files.
 If you only want to regenerate the mapping files:
 
 ```sh
@@ -318,6 +334,7 @@ Preferred direct-mapping examples:
 
 - `../ecmc_plugin_strucpp/examples/loadEL7041VelocityExample.cmd`
 - `../ecmc_plugin_strucpp/examples/loadMotionActposMirrorExample.cmd`
+- `../ecmc_plugin_strucpp/examples/loadMotionVelocityDirectExample.cmd`
 - [`ioc_project_example`](ioc_project_example)
 - [`ioc_project_minimal`](ioc_project_minimal)
 
@@ -385,6 +402,17 @@ There is also a motion-data example in
 
 For that sample, point `LOGIC_LIB` at `build/motion_actpos_mirror_logic.*`.
 The plugin defaults `MAPPING_FILE` to `build/motion_actpos_mirror_logic.*.map`.
+
+There is also a direct-mapped motion velocity example in
+`../ecmc_plugin_strucpp/examples/loadMotionVelocityDirectExample.cmd` that
+binds:
+
+- `%IL0` to `ax1.enc.actpos`
+- `%QL0` to `ax1.traj.targetvel`
+- `%QX8.0` to `ax1.drv.enable`
+
+For that sample, point `LOGIC_LIB` at `build/motion_velocity_direct_logic.*`.
+The plugin defaults `MAPPING_FILE` to `build/motion_velocity_direct_logic.*.map`.
 
 The motion-block samples are still contiguous-image examples by design. For
 the new `MC_Power` + `MC_MoveAbsolute` sample, point `LOGIC_LIB` at
