@@ -127,6 +127,12 @@ That derives names like:
 
 and still allows an explicit override when needed.
 
+The richer IOC example in [`ioc_project_example`](ioc_project_example) also
+shows both record-name override forms:
+
+- `rec_suffix=...`
+- `rec_full=...`
+
 ## Build
 
 ```sh

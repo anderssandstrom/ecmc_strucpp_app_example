@@ -75,6 +75,14 @@ The concrete sample now maps directly to EL7041 EtherCAT items:
 So this richer IOC example also follows the preferred direct item-mapping
 workflow rather than using memmaps.
 
+It also shows both EPICS record-name override forms directly in
+[`src/main.st`](src/main.st):
+
+- `rec_suffix=Main-CycleCounterAct`
+  keeps the normal `P` prefix and only overrides the suffix
+- `rec_full=IOC:Main-PosActCustom`
+  uses one fully explicit record name
+
 If needed, the shared helper can also be extended with handwritten C++ by
 setting:
 

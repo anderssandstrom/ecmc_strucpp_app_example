@@ -25,6 +25,14 @@ This minimal example also shows both annotation-placeholder styles:
 Those placeholders are expanded across the bundled ST source itself before
 `strucpp` runs, not only inside generated mapping metadata.
 
+It also shows both EPICS record-name override forms directly in
+[`src/main.st`](src/main.st):
+
+- `rec_suffix=Main-CycleCounterAct`
+  keeps the normal `P` prefix and overrides only the suffix
+- `rec_full=IOC:Main-PosActMini`
+  uses one fully explicit record name
+
 The expected flow is:
 
 1. `make`

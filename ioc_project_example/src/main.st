@@ -3,9 +3,9 @@ VAR
   actual_position    AT %IW0 : INT;   // @ecmc ec.s14.positionActual01
   drive_control      AT %QW0 : WORD;  // @ecmc ec.s14.driveControl01
   velocity_setpoint  AT %QW2 : INT;   // @ecmc ec.s14.velocitySetpoint01
-  cycle_counter      AT %MW0 : INT;   // @epics
-  manual_velocity             : INT;   // @epics rw
-  actual_pos_export           : INT;   // @epics
+  cycle_counter      AT %MW0 : INT;   // @epics rec_suffix=Main-CycleCounterAct
+  manual_velocity             : INT;   // @epics rw rec_suffix=Main-ManualVelocity-RB
+  actual_pos_export           : INT;   // @epics rec_full=IOC:Main-PosActCustom
   counter_fb                  : COUNTER_FB;
 END_VAR
 
