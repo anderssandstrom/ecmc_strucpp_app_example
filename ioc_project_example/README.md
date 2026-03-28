@@ -23,7 +23,7 @@ So the expected flow is:
 
 1. `make`
 2. `ioc install --source .`
-3. IOC startup uses `require ecmc_plugin_strucpp ...`
+3. IOC startup uses `require ecmccfg`, adds the EL7041 slave, then loads `ecmc_plugin_strucpp`
 
 The default naming conventions from `ecmc_plugin_strucpp` are used:
 

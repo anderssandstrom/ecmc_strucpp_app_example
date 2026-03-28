@@ -28,6 +28,8 @@ Because the helper stages the map and substitutions next to the logic library,
 the startup script can stay minimal:
 
 ```iocsh
+require ecmccfg
+${SCRIPTEXEC} ${ecmccfg_DIR}addSlave.cmd, "SLAVE_ID=14,HW_DESC=EL7041-0052"
 require ecmc_plugin_strucpp sandst_a "REPORT=1"
 ```
 

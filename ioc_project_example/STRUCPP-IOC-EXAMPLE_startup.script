@@ -11,4 +11,6 @@
 #   %QW0 -> ec0.s14.driveControl01
 #   %QW2 -> ec0.s14.velocitySetpoint01
 
+require ecmccfg
+${SCRIPTEXEC} ${ecmccfg_DIR}addSlave.cmd, "SLAVE_ID=14,HW_DESC=EL7041-0052"
 require ecmc_plugin_strucpp sandst_a "REPORT=1"
