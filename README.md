@@ -20,6 +20,8 @@ It builds one loadable logic library:
 - `build/mc_power_move_relative_lib_logic.so`
 - or `build/mc_power_move_relative_lib_logic.dylib` on macOS
 - `build/machine.map`
+- `build/machine_logic.so.substitutions`
+- or `build/machine_logic.dylib.substitutions` on macOS
 - `build/el7041_velocity.map`
 - `build/motion_actpos_mirror.map`
 
@@ -112,6 +114,15 @@ from the `// @epics ...` comments in [`st/machine.st`](st/machine.st). That is
 what lets `ecmc_plugin_strucpp` publish `counter` and `manual_target` as EPICS
 asyn parameters directly from the ST source.
 
+The same annotations also generate a substitutions file next to the logic
+library, for example
+[`build/machine_logic.dylib.substitutions`](build/machine_logic.dylib.substitutions)
+on macOS or `build/machine_logic.so.substitutions` on Linux, via
+[`strucpp_epics_substgen.py`](../ecmc_plugin_strucpp/scripts/strucpp_epics_substgen.py).
+That substitutions file references the generic templates shipped by
+[`ecmc_plugin_strucpp`](../ecmc_plugin_strucpp), so the ST source can also be
+the single source of truth for the EPICS record layer.
+
 The `mc_power_move_abs_logic` sample is different: it is a handwritten C++
 logic library rather than generated ST. That is intentional. It demonstrates
 the new PLCopen-style `MC_*` wrapper path without assuming external function
@@ -175,7 +186,12 @@ ECMC_STRUCPP_DECLARE_LOGIC_API("my_logic",
                                strucpp::locatedVars);
 ```
 
-If the ST source also exports EPICS variables, use the export-aware form:
+If the ST source also exports EPICS variables, the wrapper can auto-pick the
+generated `*_epics_exports.hpp` file with `__has_include(...)` and switch to
+the export-aware ABI without further manual changes. The `machine_logic.cpp`
+sample shows that pattern.
+
+The explicit export-aware form is still available:
 
 ```cpp
 #include "generated/my_program_epics_exports.hpp"
@@ -214,10 +230,10 @@ uses channel 1 of an `EL6002` and binds:
 - `%I*` to `ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01`
 - `%Q*` to `ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01`
 
-The final plugin load looks like:
+The final plugin load can now also auto-load the generated substitutions file:
 
 ```iocsh
-${SCRIPTEXEC} $(ecmc_plugin_strucpp_DIR)startup.cmd, "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/machine_logic.so,ASYN_PORT=PLUGIN.STRUCPP0,INPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01,OUTPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01,MEMORY_BYTES=64,REPORT=1"
+${SCRIPTEXEC} $(ecmc_plugin_strucpp_DIR)startup.cmd, "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/machine_logic.so,ASYN_PORT=PLUGIN.STRUCPP0,INPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01,OUTPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01,MEMORY_BYTES=64,EPICS_SUBST=/absolute/path/to/build/machine_logic.so.substitutions,DB_PREFIX=IOC:,REPORT=1"
 ```
 
 That sample also exports two internal ST variables on the plugin-owned asyn
@@ -225,6 +241,18 @@ port `PLUGIN.STRUCPP0`:
 
 - `plugin.strucpp.machine.counter` as read-only
 - `plugin.strucpp.machine.manual_target` as writable
+
+If you omit `EPICS_SUBST`, the helper defaults to `${LOGIC_LIB}.substitutions`
+when `DB_PREFIX` or `DB_MACROS` is set. So the normal call can be:
+
+```iocsh
+${SCRIPTEXEC} $(ecmc_plugin_strucpp_DIR)startup.cmd, "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/machine_logic.so,ASYN_PORT=PLUGIN.STRUCPP0,INPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01,OUTPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01,MEMORY_BYTES=64,DB_PREFIX=IOC:,REPORT=1"
+```
+
+That automatically loads matching records through `dbLoadTemplate(...)` with:
+
+- `P=$(IOC)` by default, or `P=$(DB_PREFIX)` if set explicitly
+- `PORT=PLUGIN.STRUCPP0`
 
 There is also an EL7041 velocity example in
 `../ecmc_plugin_strucpp/examples/loadEL7041VelocityExample.cmd` that binds:
