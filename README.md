@@ -374,8 +374,8 @@ helper. It can also auto-load the generated substitutions file:
 require ecmc_plugin_strucpp sandst_a "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/machine_logic.so,ASYN_PORT=PLUGIN.STRUCPP0,INPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01,OUTPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01,MEMORY_BYTES=64,EPICS_SUBST=/absolute/path/to/build/machine_logic.so.substitutions,REPORT=1"
 ```
 
-That sample also exports two internal ST variables on the plugin-owned asyn
-port `PLUGIN.STRUCPP0`:
+That sample also exports two internal ST variables on the plugin-owned plain
+asyn port `PLUGIN.STRUCPP0`:
 
 - `plugin.strucpp.machine.counter` as read-only
 - `plugin.strucpp.machine.manual_target` as writable
