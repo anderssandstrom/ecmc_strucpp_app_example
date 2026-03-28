@@ -12,6 +12,8 @@ PYTHON ?= python3
 MAPGEN := $(ECMC_PLUGIN_STRUCPP)/scripts/strucpp_mapgen.py
 EXPORTGEN := $(ECMC_PLUGIN_STRUCPP)/scripts/strucpp_epics_exportgen.py
 SUBSTGEN := $(ECMC_PLUGIN_STRUCPP)/scripts/strucpp_epics_substgen.py
+MAPGEN_DEFINES ?= AXIS_INDEX=1
+MAPGEN_DEFINE_ARGS := $(foreach def,$(MAPGEN_DEFINES),--define $(def))
 
 CXX ?= c++
 CXXFLAGS += -std=c++17 -fPIC -Wall -Wextra
@@ -147,11 +149,11 @@ $(EL7041_VELOCITY_MAP): src/generated/el7041_velocity.hpp st/el7041_velocity.st 
 
 $(MOTION_ACTPOS_MIRROR_MAP): src/generated/motion_actpos_mirror.hpp st/motion_actpos_mirror.st $(MAPGEN)
 	@mkdir -p $(dir $@)
-	$(PYTHON) $(MAPGEN) --header src/generated/motion_actpos_mirror.hpp --st-source st/motion_actpos_mirror.st --output $@
+	$(PYTHON) $(MAPGEN) $(MAPGEN_DEFINE_ARGS) --header src/generated/motion_actpos_mirror.hpp --st-source st/motion_actpos_mirror.st --output $@
 
 $(MOTION_VELOCITY_DIRECT_MAP): src/generated/motion_velocity_direct.hpp st/motion_velocity_direct.st $(MAPGEN)
 	@mkdir -p $(dir $@)
-	$(PYTHON) $(MAPGEN) --header src/generated/motion_velocity_direct.hpp --st-source st/motion_velocity_direct.st --output $@
+	$(PYTHON) $(MAPGEN) $(MAPGEN_DEFINE_ARGS) --header src/generated/motion_velocity_direct.hpp --st-source st/motion_velocity_direct.st --output $@
 
 check-motion-lib:
 	@test -f $(ECMC_MOTION_STLIB) || (echo "Missing motion library: $(ECMC_MOTION_STLIB)" >&2; exit 1)

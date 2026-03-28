@@ -125,6 +125,16 @@ The shared helper workflow also generates `${LOGIC_LIB}.summary.txt` reports
 and supports `make validate` for dry-run checking before runtime. This sample
 repo still uses its own makefile, but the same generators and stricter checks
 apply to the generated `.map` and `.substitutions` files.
+For the motion samples in this repo, the mapping generator defaults to:
+
+- `MAPGEN_DEFINES=AXIS_INDEX=1`
+
+So the checked-in direct motion maps target `ax1.*`. To retarget them, rebuild
+the maps with for example:
+
+```sh
+make MAPGEN_DEFINES='AXIS_INDEX=2' maps
+```
 If you only want to regenerate the mapping files:
 
 ```sh
@@ -401,7 +411,9 @@ There is also a motion-data example in
 - `%QL0` to `ax1.traj.targetpos`
 
 For that sample, point `LOGIC_LIB` at `build/motion_actpos_mirror_logic.*`.
-The plugin defaults `MAPPING_FILE` to `build/motion_actpos_mirror_logic.*.map`.
+The checked-in map defaults to axis `1`, but the ST annotation now uses
+`ax${AXIS_INDEX}` placeholders so the map can be rebuilt for another axis
+without editing the ST source.
 
 There is also a direct-mapped motion velocity example in
 `../ecmc_plugin_strucpp/examples/loadMotionVelocityDirectExample.cmd` that
@@ -412,7 +424,9 @@ binds:
 - `%QX8.0` to `ax1.drv.enable`
 
 For that sample, point `LOGIC_LIB` at `build/motion_velocity_direct_logic.*`.
-The plugin defaults `MAPPING_FILE` to `build/motion_velocity_direct_logic.*.map`.
+The checked-in map defaults to axis `1`, but the ST annotation now uses
+`ax${AXIS_INDEX}` placeholders so the map can be rebuilt for another axis
+without editing the ST source.
 
 The motion-block samples are still contiguous-image examples by design. For
 the new `MC_Power` + `MC_MoveAbsolute` sample, point `LOGIC_LIB` at
