@@ -113,6 +113,20 @@ If you do not want to hand-write the located declarations, use
 from `ecmc_plugin_strucpp` to generate the `VAR` block or a starter `main.st`
 from a short direct-mapping manifest.
 
+For exported EPICS variables, the short form now works too:
+
+```iecst
+counter       : INT; // @epics
+manual_target : INT; // @epics rw
+```
+
+That derives names like:
+
+- `plugin.strucpp0.<program>.counter`
+- `plugin.strucpp0.<program>.manual_target`
+
+and still allows an explicit override when needed.
+
 ## Build
 
 ```sh
@@ -377,8 +391,8 @@ require ecmc_plugin_strucpp sandst_a "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/ma
 That sample also exports two internal ST variables on the plugin-owned plain
 asyn port `PLUGIN.STRUCPP0`:
 
-- `plugin.strucpp.machine.counter` as read-only
-- `plugin.strucpp.machine.manual_target` as writable
+- `plugin.strucpp0.machine.counter` as read-only
+- `plugin.strucpp0.machine.manual_target` as writable
 
 If you omit `EPICS_SUBST`, the helper defaults to `${LOGIC_LIB}.substitutions`
 when `DB_PREFIX` or `DB_MACROS` is set. So the normal call can be:

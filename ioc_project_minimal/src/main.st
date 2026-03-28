@@ -3,8 +3,8 @@ VAR
   actual_position    AT %IW0 : INT;   // @ecmc ec0.s14.positionActual01
   drive_control      AT %QW0 : WORD;  // @ecmc ec0.s14.driveControl01
   velocity_setpoint  AT %QW2 : INT;   // @ecmc ec0.s14.velocitySetpoint01
-  cycle_counter      AT %MW0 : INT;   // @epics plugin.strucpp.main.cycle_counter
-  actual_pos_export           : INT;   // @epics plugin.strucpp.main.actual_position
+  cycle_counter      AT %MW0 : INT;   // @epics
+  actual_pos_export           : INT;   // @epics
 END_VAR
 
 actual_pos_export := actual_position;
