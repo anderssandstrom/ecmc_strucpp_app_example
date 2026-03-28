@@ -1,11 +1,11 @@
-PROGRAM MACHINE
+PROGRAM MAIN
 VAR
   actual_position    AT %IW0 : INT;   // @ecmc ec0.s14.positionActual01
   drive_control      AT %QW0 : WORD;  // @ecmc ec0.s14.driveControl01
   velocity_setpoint  AT %QW2 : INT;   // @ecmc ec0.s14.velocitySetpoint01
-  cycle_counter      AT %MW0 : INT;   // @epics plugin.strucpp.machine.cycle_counter
-  manual_velocity             : INT;   // @epics plugin.strucpp.machine.manual_velocity rw
-  actual_pos_export           : INT;   // @epics plugin.strucpp.machine.actual_position
+  cycle_counter      AT %MW0 : INT;   // @epics plugin.strucpp.main.cycle_counter
+  manual_velocity             : INT;   // @epics plugin.strucpp.main.manual_velocity rw
+  actual_pos_export           : INT;   // @epics plugin.strucpp.main.actual_position
   counter_fb                  : COUNTER_FB;
 END_VAR
 

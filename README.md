@@ -187,7 +187,7 @@ So the example project does this:
   `${LOGIC_LIB}.substitutions`
 - stages those runtime artifacts into [`ioc_project_example/bin`](ioc_project_example/bin)
 - uses [`STRUCPP-IOC-EXAMPLE_startup.script`](ioc_project_example/STRUCPP-IOC-EXAMPLE_startup.script)
-  to load `bin/machine_logic.so`
+  to use the standard `bin/main.so` default
 
 The richer IOC example now also maps directly to EL7041 EtherCAT items:
 
@@ -228,10 +228,10 @@ overall IOC workflow.
 The directory [`ioc_project_minimal`](ioc_project_minimal) is the shortest
 path for a real IOC project:
 
-- one ST file in [`src/machine.st`](ioc_project_minimal/src/machine.st)
+- one ST file in [`src/main.st`](ioc_project_minimal/src/main.st)
 - one short [`src/Makefile`](ioc_project_minimal/src/Makefile)
 - no handwritten C++ sources
-- startup only passes `LOGIC_LIB`
+- startup only calls `require`
 
 It uses the same shared helper and the same `bin/` staging convention, but
 removes the split-ST and C++ extension-point material so the default workflow
@@ -357,7 +357,7 @@ These show the preferred current pattern:
 
 - `// @ecmc ...` in ST
 - generated `${LOGIC_LIB}.map`
-- startup only passes `LOGIC_LIB` in the common case
+- startup can omit `LOGIC_LIB` in the standard `bin/main.so` layout
 
 The concrete sample in `../ecmc_plugin_strucpp/examples/loadPluginExample.cmd`
 is kept intentionally as the contiguous-image example. It uses channel 1 of an
