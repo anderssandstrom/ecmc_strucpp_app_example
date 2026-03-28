@@ -19,11 +19,14 @@ It builds one loadable logic library:
 - or `build/mc_power_move_velocity_lib_logic.dylib` on macOS
 - `build/mc_power_move_relative_lib_logic.so`
 - or `build/mc_power_move_relative_lib_logic.dylib` on macOS
-- `build/machine.map`
+- `build/machine_logic.so.map`
+- or `build/machine_logic.dylib.map` on macOS
 - `build/machine_logic.so.substitutions`
 - or `build/machine_logic.dylib.substitutions` on macOS
-- `build/el7041_velocity.map`
-- `build/motion_actpos_mirror.map`
+- `build/el7041_velocity_logic.so.map`
+- or `build/el7041_velocity_logic.dylib.map` on macOS
+- `build/motion_actpos_mirror_logic.so.map`
+- or `build/motion_actpos_mirror_logic.dylib.map` on macOS
 
 Those logic libraries are what the generic `ecmc_plugin_strucpp` host loads through
 its `logic_lib=...` config string.
@@ -97,7 +100,8 @@ Defaults:
 - `STRUCPP=../strucpp`
 - `ECMC_PLUGIN_STRUCPP=../ecmc_plugin_strucpp`
 
-`make all` now builds all logic libraries and all generated `.map` files.
+`make all` now builds all logic libraries and all generated `.map` files next
+to the corresponding logic library.
 If you only want to regenerate the mapping files:
 
 ```sh
@@ -105,8 +109,9 @@ make maps
 ```
 
 Those `.map` files are generated from the `// @ecmc <ecmcDataItem>` comments in
-[`st/machine.st`](st/machine.st) and
-[`st/el7041_velocity.st`](st/el7041_velocity.st).
+the ST source and follow the same naming convention as the logic library:
+
+- `build/<logic_lib>.$(LIBEXT).map`
 
 The `machine` sample also generates
 [`src/generated/machine_epics_exports.hpp`](src/generated/machine_epics_exports.hpp)
@@ -269,8 +274,9 @@ that the manifest covers the exact `%IW0`, `%QW0`, and `%QW2` addresses used by
 the program, and links those addresses to the final `ecmcDataItem` buffers once
 before the RT loop starts.
 
-For that sample, point `MAPPING_FILE` at the generated
-`build/el7041_velocity.map`.
+For that sample, the preferred default is the generated
+`build/el7041_velocity_logic.*.map` next to the logic library, so
+`MAPPING_FILE` can normally be omitted.
 
 There is also a motion-data example in
 `../ecmc_plugin_strucpp/examples/loadMotionActposMirrorExample.cmd` that binds:
@@ -278,8 +284,8 @@ There is also a motion-data example in
 - `%IL0` to `ax1.enc.actpos`
 - `%QL0` to `ax1.traj.targetpos`
 
-For that sample, point `LOGIC_LIB` at `build/motion_actpos_mirror_logic.*` and
-`MAPPING_FILE` at `build/motion_actpos_mirror.map`.
+For that sample, point `LOGIC_LIB` at `build/motion_actpos_mirror_logic.*`.
+The plugin defaults `MAPPING_FILE` to `build/motion_actpos_mirror_logic.*.map`.
 
 For the new `MC_Power` + `MC_MoveAbsolute` sample, point `LOGIC_LIB` at
 `build/mc_power_move_abs_logic.*` and bind it with the host plugin's
