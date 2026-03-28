@@ -171,6 +171,18 @@ library, the default plugin conventions work:
 
 So the default mapping/export startup path stays minimal.
 
+If an IOC project needs a small amount of handwritten C++ glue, the example now
+also includes concrete opt-in files under
+[`ioc_project_example/src`](ioc_project_example/src):
+
+- [`Makefile.with_cpp`](ioc_project_example/src/Makefile.with_cpp)
+- [`custom_logic_wrapper.cpp`](ioc_project_example/src/custom_logic_wrapper.cpp)
+- [`machine_helper.cpp`](ioc_project_example/src/machine_helper.cpp)
+
+Those are not used by default, but they show how to override the generated
+wrapper and compile extra C++ into the same logic library without changing the
+overall IOC workflow.
+
 The `mc_power_move_abs_logic` sample is different: it is a handwritten C++
 logic library rather than generated ST. That is intentional. It demonstrates
 the new PLCopen-style `MC_*` wrapper path without assuming external function

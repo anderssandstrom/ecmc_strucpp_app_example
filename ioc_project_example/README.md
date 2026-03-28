@@ -65,3 +65,23 @@ This example also shows a split ST project:
   reusable helper FB
 - [`src/machine.st`](src/machine.st)
   final `PROGRAM`
+
+If needed, the shared helper can also be extended with handwritten C++ by
+setting:
+
+- `WRAPPER_CPP := my_wrapper.cpp`
+- `EXTRA_CPP_SOURCES := helper.cpp more_glue.cpp`
+
+That is optional. The default path here intentionally stays fully generated,
+but the `src/` directory also ships concrete opt-in examples:
+
+- [`src/Makefile.with_cpp`](src/Makefile.with_cpp)
+  alternate helper configuration using handwritten C++
+- [`src/custom_logic_wrapper.cpp`](src/custom_logic_wrapper.cpp)
+  manual wrapper that replaces the generated one
+- [`src/machine_helper.cpp`](src/machine_helper.cpp)
+  extra C++ translation unit linked into the same logic library
+
+So if a project needs a small amount of direct C++ glue, the intended next
+step is to copy `Makefile.with_cpp` over `src/Makefile` and adjust the helper
+files as needed, rather than rewriting the whole build flow.
