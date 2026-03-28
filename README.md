@@ -230,10 +230,12 @@ uses channel 1 of an `EL6002` and binds:
 - `%I*` to `ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01`
 - `%Q*` to `ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01`
 
-The final plugin load can now also auto-load the generated substitutions file:
+The final plugin load is intended to happen through `require`, which makes
+`$(ecmc_plugin_strucpp_DIR)` available and auto-executes the plugin startup
+helper. It can also auto-load the generated substitutions file:
 
 ```iocsh
-${SCRIPTEXEC} $(ecmc_plugin_strucpp_DIR)startup.cmd, "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/machine_logic.so,ASYN_PORT=PLUGIN.STRUCPP0,INPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01,OUTPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01,MEMORY_BYTES=64,EPICS_SUBST=/absolute/path/to/build/machine_logic.so.substitutions,DB_PREFIX=IOC:,REPORT=1"
+require ecmc_plugin_strucpp sandst_a "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/machine_logic.so,ASYN_PORT=PLUGIN.STRUCPP0,INPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01,OUTPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01,MEMORY_BYTES=64,EPICS_SUBST=/absolute/path/to/build/machine_logic.so.substitutions,REPORT=1"
 ```
 
 That sample also exports two internal ST variables on the plugin-owned asyn
@@ -246,7 +248,7 @@ If you omit `EPICS_SUBST`, the helper defaults to `${LOGIC_LIB}.substitutions`
 when `DB_PREFIX` or `DB_MACROS` is set. So the normal call can be:
 
 ```iocsh
-${SCRIPTEXEC} $(ecmc_plugin_strucpp_DIR)startup.cmd, "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/machine_logic.so,ASYN_PORT=PLUGIN.STRUCPP0,INPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01,OUTPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01,MEMORY_BYTES=64,DB_PREFIX=IOC:,REPORT=1"
+require ecmc_plugin_strucpp sandst_a "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/machine_logic.so,ASYN_PORT=PLUGIN.STRUCPP0,INPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01,OUTPUT_ITEM=ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01,MEMORY_BYTES=64,REPORT=1"
 ```
 
 That automatically loads matching records through `dbLoadTemplate(...)` with:
@@ -284,7 +286,7 @@ For the new `MC_Power` + `MC_MoveAbsolute` sample, point `LOGIC_LIB` at
 contiguous-image mode:
 
 ```iocsh
-${SCRIPTEXEC} $(ecmc_plugin_strucpp_DIR)startup.cmd, "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/mc_power_move_abs_logic.so,INPUT_ITEM=<40-byte-input-item>,OUTPUT_ITEM=<16-byte-output-item>,MEMORY_BYTES=16,REPORT=1"
+require ecmc_plugin_strucpp sandst_a "PLUGIN_ID=0,LOGIC_LIB=/absolute/path/to/mc_power_move_abs_logic.so,INPUT_ITEM=<40-byte-input-item>,OUTPUT_ITEM=<16-byte-output-item>,MEMORY_BYTES=16,REPORT=1"
 ```
 
 The sample itself does not depend on EtherCAT. The two items only need to be
