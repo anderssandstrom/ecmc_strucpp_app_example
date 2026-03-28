@@ -314,8 +314,22 @@ make regen-container
 Build the generic host plugin in `../ecmc_plugin_strucpp`, configure a real
 slave, then point the host at the logic library from this repo.
 
+Preferred direct-mapping examples:
+
+- `../ecmc_plugin_strucpp/examples/loadEL7041VelocityExample.cmd`
+- `../ecmc_plugin_strucpp/examples/loadMotionActposMirrorExample.cmd`
+- [`ioc_project_example`](ioc_project_example)
+- [`ioc_project_minimal`](ioc_project_minimal)
+
+These show the preferred current pattern:
+
+- `// @ecmc ...` in ST
+- generated `${LOGIC_LIB}.map`
+- startup only passes `LOGIC_LIB` in the common case
+
 The concrete sample in `../ecmc_plugin_strucpp/examples/loadPluginExample.cmd`
-uses channel 1 of an `EL6002` and binds:
+is kept intentionally as the contiguous-image example. It uses channel 1 of an
+`EL6002` and binds:
 
 - `%I*` to `ec0.s${ECMC_EC_SLAVE_NUM}.mm.inputDataArray01`
 - `%Q*` to `ec0.s${ECMC_EC_SLAVE_NUM}.mm.outputDataArray01`
@@ -372,7 +386,8 @@ There is also a motion-data example in
 For that sample, point `LOGIC_LIB` at `build/motion_actpos_mirror_logic.*`.
 The plugin defaults `MAPPING_FILE` to `build/motion_actpos_mirror_logic.*.map`.
 
-For the new `MC_Power` + `MC_MoveAbsolute` sample, point `LOGIC_LIB` at
+The motion-block samples are still contiguous-image examples by design. For
+the new `MC_Power` + `MC_MoveAbsolute` sample, point `LOGIC_LIB` at
 `build/mc_power_move_abs_logic.*` and bind it with the host plugin's
 contiguous-image mode:
 
