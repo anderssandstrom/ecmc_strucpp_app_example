@@ -39,9 +39,9 @@ defaults to `bin/main.so.map` and does not need `INPUT_ITEM`,
 
 The concrete sample maps directly to EL7041 PDO items:
 
-- `%IW0` -> `ec0.s14.positionActual01`
-- `%QW0` -> `ec0.s14.driveControl01`
-- `%QW2` -> `ec0.s14.velocitySetpoint01`
+- `%IW0` -> `ec.s14.positionActual01`
+- `%QW0` -> `ec.s14.driveControl01`
+- `%QW2` -> `ec.s14.velocitySetpoint01`
 
 So this example is deliberately showing the direct EtherCAT-data path rather
 than the older contiguous memmap path.

@@ -68,9 +68,9 @@ This example also shows a split ST project:
 
 The concrete sample now maps directly to EL7041 EtherCAT items:
 
-- `%IW0` -> `ec0.s14.positionActual01`
-- `%QW0` -> `ec0.s14.driveControl01`
-- `%QW2` -> `ec0.s14.velocitySetpoint01`
+- `%IW0` -> `ec.s14.positionActual01`
+- `%QW0` -> `ec.s14.driveControl01`
+- `%QW2` -> `ec.s14.velocitySetpoint01`
 
 So this richer IOC example also follows the preferred direct item-mapping
 workflow rather than using memmaps.

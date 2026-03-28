@@ -205,9 +205,9 @@ So the example project does this:
 
 The richer IOC example now also maps directly to EL7041 EtherCAT items:
 
-- `ec0.s14.positionActual01`
-- `ec0.s14.driveControl01`
-- `ec0.s14.velocitySetpoint01`
+- `ec.s14.positionActual01`
+- `ec.s14.driveControl01`
+- `ec.s14.velocitySetpoint01`
 
 The example now uses the reusable helper shipped by
 [`ecmc_plugin_strucpp`](../ecmc_plugin_strucpp):
@@ -254,9 +254,9 @@ is easier to copy.
 Unlike the older memmap-style sample, the minimal IOC example now maps
 directly to EtherCAT item names for an EL7041:
 
-- `ec0.s14.positionActual01`
-- `ec0.s14.driveControl01`
-- `ec0.s14.velocitySetpoint01`
+- `ec.s14.positionActual01`
+- `ec.s14.driveControl01`
+- `ec.s14.velocitySetpoint01`
 
 The `mc_power_move_abs_logic` sample is different: it is a handwritten C++
 logic library rather than generated ST. That is intentional. It demonstrates
