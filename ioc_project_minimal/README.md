@@ -22,6 +22,9 @@ This minimal example also shows both annotation-placeholder styles:
 - required build-time define from `src/Makefile`:
   - `ANNOTATION_DEFINES := CH_ID=01`
 
+Those placeholders are expanded across the bundled ST source itself before
+`strucpp` runs, not only inside generated mapping metadata.
+
 The expected flow is:
 
 1. `make`
