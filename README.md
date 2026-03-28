@@ -86,6 +86,9 @@ its `logic_lib=...` config string.
   best-guess `gfa-iocutils`-style IOC project layout that keeps Structured Text
   in an IOC project, stages the runtime artifacts into a top-level `bin/`
   directory, and then runs `ioc install`
+- [`ioc_project_minimal`](ioc_project_minimal)
+  smallest practical `gfa-iocutils`-style IOC project with one ST file and no
+  handwritten C++ sources
 
 In a real application repo, the only handwritten file should normally be the
 logic wrapper. If you want startup-linked `ecmc` maps, add `// @ecmc ...`
@@ -182,6 +185,27 @@ also includes concrete opt-in files under
 Those are not used by default, but they show how to override the generated
 wrapper and compile extra C++ into the same logic library without changing the
 overall IOC workflow.
+
+## Minimal IOC Project Example
+
+The directory [`ioc_project_minimal`](ioc_project_minimal) is the shortest
+path for a real IOC project:
+
+- one ST file in [`src/machine.st`](ioc_project_minimal/src/machine.st)
+- one short [`src/Makefile`](ioc_project_minimal/src/Makefile)
+- no handwritten C++ sources
+- startup only passes `LOGIC_LIB`
+
+It uses the same shared helper and the same `bin/` staging convention, but
+removes the split-ST and C++ extension-point material so the default workflow
+is easier to copy.
+
+Unlike the older memmap-style sample, the minimal IOC example now maps
+directly to EtherCAT item names for an EL7041:
+
+- `ec0.s14.positionActual01`
+- `ec0.s14.driveControl01`
+- `ec0.s14.velocitySetpoint01`
 
 The `mc_power_move_abs_logic` sample is different: it is a handwritten C++
 logic library rather than generated ST. That is intentional. It demonstrates
